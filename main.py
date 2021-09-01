@@ -10,7 +10,7 @@ API_TOKEN = '1232811909:AAHPQH7f-_A2dLxLVH0-UKe8XML2OgSWfLc'
 bot = telebot.TeleBot(API_TOKEN)
 
 # data = {
-#     "last_car_id": "",
+#     "last_cars_id": "",
 #     "path": "",
 #     "id": ""
 # }
@@ -66,19 +66,23 @@ def searcher():
                 print('try')
                 try:
                     html = requests.get(url=data['path'], headers=headers)
-                    soup = bs4.BeautifulSoup(html.text, "html.parser")
-                    image_link = str(soup.find_all("img", {"itemprop": "image"})[0]['srcset']).split(',')[-1][:-5]
-                    car_info = str(soup.find_all("img", {"itemprop": "image"})[0]['alt'])
-                    car_link = 'https://www.avito.ru' + str(soup.find_all("a", {"itemprop": "url"})[0]['href'])
-                    if data['last_car_id'] != car_link.split('_')[-1]:
-                        data['last_car_id'] = car_link.split('_')[-1]
-                        markup = InlineKeyboardMarkup()
-                        markup.row_width = 1
-                        markup.add(InlineKeyboardButton("Открыть на авито", url=car_link))
-                        bot.send_photo(data['id'], image_link, caption=car_info, reply_markup=markup)
-                        with open('data/data.bruh', 'w', encoding='UTF-8') as f:
-                            json.dump(data, f)
-                            print('save')
+                    items = bs4.BeautifulSoup(html.text, "html.parser").find_all("div", {"data-marker": "item"})
+                    for item in items:
+                        try:
+                            image_link = str(item.find("img", {"itemprop": "image"})['srcset']).split(',')[-1][:-5]
+                            car_info = str(item.find("img", {"itemprop": "image"})['alt'])
+                            car_link = 'https://www.avito.ru' + str(item.find("a", {"itemprop": "url"})['href'])
+                            if car_link.split('_')[-1] not in data['last_cars_id']:
+                                data['last_cars_id'].append(car_link.split('_')[-1])
+                                markup = InlineKeyboardMarkup()
+                                markup.row_width = 1
+                                markup.add(InlineKeyboardButton("Открыть на авито", url=car_link))
+                                bot.send_photo(data['id'], image_link, caption=car_info, reply_markup=markup)
+                                with open('data/data.bruh', 'w', encoding='UTF-8') as f:
+                                    json.dump(data, f)
+                                    print('save')
+                        except:
+                            pass
                     check = True
                     print('success')
                 except:
