@@ -74,8 +74,9 @@ def searcher():
                 tmp_data = data
                 try:
                     image_link = str(item.find("img", {"itemprop": "image"})['srcset']).split(',')[-1][:-5]
-                    car_info = str(item.find("img", {"itemprop": "image"})['alt'])
+                    car_info = str(item.find("img", {"itemprop": "image"})['alt']) + "\n" + str(item.find("div", {"data-marker": "item-specific-params"}).text)
                     car_link = 'https://www.avito.ru' + str(item.find("a", {"itemprop": "url"})['href'])
+                    print(car_info)
                     if car_link.split('_')[-1] not in data['last_cars_id']:
                         try:
                             data['last_cars_id'].append(car_link.split('_')[-1])
