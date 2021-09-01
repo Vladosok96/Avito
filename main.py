@@ -60,37 +60,42 @@ def searcher():
                 '''Chrome/91.0.4472.164 Safari/537.36 OPR/77.0.4054.275 '''
             }
 
-            tmp_data = data
+            items = 0
             check = False
             while not check:
-                print('try')
                 try:
+                    print('try')
                     html = requests.get(url=data['path'], headers=headers)
                     items = bs4.BeautifulSoup(html.text, "html.parser").find_all("div", {"data-marker": "item"})
-                    for item in items:
-                        try:
-                            image_link = str(item.find("img", {"itemprop": "image"})['srcset']).split(',')[-1][:-5]
-                            car_info = str(item.find("img", {"itemprop": "image"})['alt'])
-                            car_link = 'https://www.avito.ru' + str(item.find("a", {"itemprop": "url"})['href'])
-                            if car_link.split('_')[-1] not in data['last_cars_id']:
-                                data['last_cars_id'].append(car_link.split('_')[-1])
-                                markup = InlineKeyboardMarkup()
-                                markup.row_width = 1
-                                markup.add(InlineKeyboardButton("Открыть на авито", url=car_link))
-                                bot.send_photo(data['id'], image_link, caption=car_info, reply_markup=markup)
-                                with open('data/data.bruh', 'w', encoding='UTF-8') as f:
-                                    json.dump(data, f)
-                                    print('save')
-                        except:
-                            pass
                     check = True
-                    print('success')
                 except:
-                    print('error')
-                    data = tmp_data
-                    with open('data/data.bruh', 'w', encoding='UTF-8') as f:
-                        json.dump(data, f)
-                        print('save')
+                    pass
+            for item in items:
+                tmp_data = data
+                try:
+                    image_link = str(item.find("img", {"itemprop": "image"})['srcset']).split(',')[-1][:-5]
+                    car_info = str(item.find("img", {"itemprop": "image"})['alt'])
+                    car_link = 'https://www.avito.ru' + str(item.find("a", {"itemprop": "url"})['href'])
+                    if car_link.split('_')[-1] not in data['last_cars_id']:
+                        try:
+                            data['last_cars_id'].append(car_link.split('_')[-1])
+                            markup = InlineKeyboardMarkup()
+                            markup.row_width = 1
+                            markup.add(InlineKeyboardButton("Открыть на авито", url=car_link))
+                            bot.send_photo(data['id'], image_link, caption=car_info, reply_markup=markup)
+                            print(car_link)
+                            with open('data/data.bruh', 'w', encoding='UTF-8') as f:
+                                json.dump(data, f)
+                                print('save')
+                        except:
+                            print('error')
+                            data = tmp_data
+                            with open('data/data.bruh', 'w', encoding='UTF-8') as f:
+                                json.dump(data, f)
+                                print('save')
+                except:
+                    pass
+            print('success')
 
 
 if __name__ == '__main__':
